@@ -18,6 +18,7 @@ const Selection = () => {
   const [tickets, setTickets] = useState(1);
   const [time, setTime] = useState('12:00');
   const [date, setDate] = useState(format(new Date(), 'dd-MM-yyyy'));
+  const [isLoading, setIsLoading] = useState(false);
 
   const showTimes = [
     { time: '09:00', icon: Sun },
@@ -27,22 +28,37 @@ const Selection = () => {
 
   if (!movie) return null;
 
-  const handleBook = () => {
-    addBooking({
-      id: Math.random().toString(36).substr(2, 9),
-      movie: movie.title,
-      tickets,
-      amount: tickets * 25,
-      time,
-      date,
-    });
+  const handleBook = async () => {
+    setIsLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      addBooking({
+        id: Math.random().toString(36).substr(2, 9),
+        movie: movie.title,
+        tickets,
+        amount: tickets * 25,
+        time,
+        date,
+      });
 
-    toast({
-      title: "Success",
-      description: "Tickets Booked Successfully!",
-    });
+      toast({
+        title: "Success",
+        description: "Tickets Booked Successfully!",
+      });
 
-    navigate('/activity');
+      navigate('/activity');
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to book tickets",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -141,9 +157,23 @@ const Selection = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleBook}
-            className="w-[200px] rounded-lg bg-black py-3 text-white transition-colors hover:bg-black/90"
+            disabled={isLoading}
+            className={`w-[200px] rounded-lg py-3 text-white transition-colors relative ${
+              isLoading ? 'bg-black/70' : 'bg-black hover:bg-black/90'
+            }`}
           >
-            Book Ticket
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <motion.div
+                  className="h-4 w-4 rounded-full border-2 border-white border-t-transparent"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
+                <span>Booking...</span>
+              </div>
+            ) : (
+              'Book Ticket'
+            )}
           </motion.button>
         </div>
       </motion.div>
